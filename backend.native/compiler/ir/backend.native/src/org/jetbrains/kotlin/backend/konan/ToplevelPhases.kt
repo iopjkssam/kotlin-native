@@ -237,7 +237,7 @@ internal val psiToIrPhase = konanUnitPhase(
                     .filter(ModuleDescriptor::isFromInteropLibrary)
                     .forEach(irProviderForCEnums::buildAllEnumsFrom)
 
-            module.acceptVoid(ManglerChecker(KonanClassicMangler, KonanManglerIr, Ir2DescriptorManglerAdapter(KonanManglerDesc)))
+            module.acceptVoid(ManglerChecker(KonanManglerIr, Ir2DescriptorManglerAdapter(KonanManglerDesc)))
 
             irModule = module
             irModules = deserializer.modules.filterValues { llvmModuleSpecification.containsModule(it) }
