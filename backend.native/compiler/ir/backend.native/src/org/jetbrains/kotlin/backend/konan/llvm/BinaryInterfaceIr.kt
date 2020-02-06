@@ -1,22 +1,18 @@
 package org.jetbrains.kotlin.backend.konan.llvm
 
-import org.jetbrains.kotlin.backend.common.serialization.mangle.KotlinExportChecker
-import org.jetbrains.kotlin.backend.common.serialization.mangle.KotlinMangleComputer
+import org.jetbrains.kotlin.backend.common.serialization.mangle.MangleMode
 import org.jetbrains.kotlin.backend.common.serialization.mangle.ir.IrBasedKotlinManglerImpl
 import org.jetbrains.kotlin.backend.common.serialization.mangle.ir.IrExportCheckerVisitor
 import org.jetbrains.kotlin.backend.common.serialization.mangle.ir.IrMangleComputer
 import org.jetbrains.kotlin.backend.konan.*
-import org.jetbrains.kotlin.descriptors.FunctionDescriptor
-import org.jetbrains.kotlin.descriptors.ValueParameterDescriptor
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.types.getClass
 import org.jetbrains.kotlin.ir.util.hasAnnotation
-import java.lang.StringBuilder
 
 abstract class AbstractKonanIrMangler : IrBasedKotlinManglerImpl() {
     override fun getExportChecker(): IrExportCheckerVisitor = KonanIrExportChecker()
 
-    override fun getMangleComputer(prefix: String): IrMangleComputer = KonanIrManglerComputer(StringBuilder(256), false)
+    override fun getMangleComputer(mode: MangleMode): IrMangleComputer = KonanIrManglerComputer(StringBuilder(256), mode)
 
     private class KonanIrExportChecker : IrExportCheckerVisitor() {
         override fun IrDeclaration.isPlatformSpecificExported(): Boolean {
@@ -44,8 +40,8 @@ abstract class AbstractKonanIrMangler : IrBasedKotlinManglerImpl() {
 
     }
 
-    private class KonanIrManglerComputer(builder: StringBuilder, skipSig: Boolean) : IrMangleComputer(builder, skipSig) {
-        override fun copy(skipSig: Boolean): IrMangleComputer = KonanIrManglerComputer(builder, skipSig)
+    private class KonanIrManglerComputer(builder: StringBuilder, mode: MangleMode) : IrMangleComputer(builder, mode) {
+        override fun copy(newMode: MangleMode): IrMangleComputer = KonanIrManglerComputer(builder, newMode)
 
         override fun IrFunction.platformSpecificFunctionName(): String? {
             (if (this is IrConstructor && this.isObjCConstructor) this.getObjCInitMethod() else this)?.getObjCMethodInfo()

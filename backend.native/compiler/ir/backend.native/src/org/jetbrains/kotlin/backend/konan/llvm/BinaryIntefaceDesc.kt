@@ -1,18 +1,17 @@
 package org.jetbrains.kotlin.backend.konan.llvm
 
+import org.jetbrains.kotlin.backend.common.serialization.mangle.MangleMode
 import org.jetbrains.kotlin.backend.common.serialization.mangle.descriptor.DescriptorBasedKotlinManglerImpl
 import org.jetbrains.kotlin.backend.common.serialization.mangle.descriptor.DescriptorExportCheckerVisitor
 import org.jetbrains.kotlin.backend.common.serialization.mangle.descriptor.DescriptorMangleComputer
 import org.jetbrains.kotlin.backend.konan.*
 import org.jetbrains.kotlin.descriptors.*
-import org.jetbrains.kotlin.ir.declarations.IrConstructor
-import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 
 abstract class AbstractKonanDescriptorMangler : DescriptorBasedKotlinManglerImpl() {
     override fun getExportChecker(): DescriptorExportCheckerVisitor = KonanDescriptorExportChecker()
 
-    override fun getMangleComputer(prefix: String): DescriptorMangleComputer =
-            KonanDescriptorMangleComputer(StringBuilder(256), prefix, false)
+    override fun getMangleComputer(mode: MangleMode): DescriptorMangleComputer =
+            KonanDescriptorMangleComputer(StringBuilder(256), mode)
 
     private class KonanDescriptorExportChecker : DescriptorExportCheckerVisitor() {
         override fun DeclarationDescriptor.isPlatformSpecificExported(): Boolean {
@@ -40,8 +39,8 @@ abstract class AbstractKonanDescriptorMangler : DescriptorBasedKotlinManglerImpl
         }
     }
 
-    private class KonanDescriptorMangleComputer(builder: StringBuilder, prefix: String, skipSig: Boolean) : DescriptorMangleComputer(builder, prefix, skipSig) {
-        override fun copy(skipSig: Boolean): DescriptorMangleComputer = KonanDescriptorMangleComputer(builder, specialPrefix, skipSig)
+    private class KonanDescriptorMangleComputer(builder: StringBuilder, mode: MangleMode) : DescriptorMangleComputer(builder, mode) {
+        override fun copy(newMode: MangleMode): DescriptorMangleComputer = KonanDescriptorMangleComputer(builder, newMode)
 
         override fun FunctionDescriptor.platformSpecificFunctionName(): String? {
             (if (this is ConstructorDescriptor && this.isObjCConstructor) this.getObjCInitMethod() else this)?.getObjCMethodInfo()

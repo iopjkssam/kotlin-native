@@ -6,6 +6,7 @@
 package org.jetbrains.kotlin.backend.konan.llvm
 
 import llvm.LLVMTypeRef
+import org.jetbrains.kotlin.backend.common.serialization.mangle.MangleMode
 import org.jetbrains.kotlin.backend.common.serialization.mangle.classic.ClassicExportChecker
 import org.jetbrains.kotlin.backend.common.serialization.mangle.classic.ClassicKotlinManglerImpl
 import org.jetbrains.kotlin.backend.common.serialization.mangle.classic.ClassicMangleComputer
@@ -28,14 +29,14 @@ import org.jetbrains.kotlin.library.uniqueName
 
 abstract class AbstractKonanClassicMangler : ClassicKotlinManglerImpl() {
 
-    val IrFunction.functionName: String get() = with(getMangleComputer("")) { functionName }
-    val IrFunction.symbolName: String get() = with(getMangleComputer("") as KonanClassicMangleComputer) { symbolName }
-    val IrField.symbolName: String get() = with(getMangleComputer("") as KonanClassicMangleComputer) { symbolName }
-    val IrClass.typeInfoSymbolName: String get() = with(getMangleComputer("") as KonanClassicMangleComputer) { typeInfoSymbolName }
+    val IrFunction.functionName: String get() = with(getMangleComputer(MangleMode.FULL)) { functionName }
+    val IrFunction.symbolName: String get() = with(getMangleComputer(MangleMode.FULL) as KonanClassicMangleComputer) { symbolName }
+    val IrField.symbolName: String get() = with(getMangleComputer(MangleMode.FULL) as KonanClassicMangleComputer) { symbolName }
+    val IrClass.typeInfoSymbolName: String get() = with(getMangleComputer(MangleMode.FULL) as KonanClassicMangleComputer) { typeInfoSymbolName }
 
     override fun getExportChecker(): ClassicExportChecker = KonanClassicExportChecker()
 
-    override fun getMangleComputer(prefix: String): ClassicMangleComputer = KonanClassicMangleComputer()
+    override fun getMangleComputer(mode: MangleMode): ClassicMangleComputer = KonanClassicMangleComputer()
 
     private class KonanClassicExportChecker : ClassicExportChecker() {
         /**
